@@ -15,12 +15,12 @@ struct UndoState {
     }
 }
 
-class UndoStateManager {
+class UndoStateManager: ObservableObject {
     static let shared = UndoStateManager([])
     
-    var rects: [TextRect]
-    var undoStack: [(UndoState, UndoState)] = []
-    var redoStack: [(UndoState, UndoState)] = []
+    @Published var rects: [TextRect]
+    @Published var undoStack: [(UndoState, UndoState)] = []
+    @Published var redoStack: [(UndoState, UndoState)] = []
     
     init(_ rects: [TextRect]) {
         self.rects = rects

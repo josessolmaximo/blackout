@@ -231,7 +231,9 @@ class PhotoEditingViewController: UIViewController, PHContentEditingController {
 
                 let correctedRect = CGRect(origin: .init(x: rect.minX, y: rect.minY), size: .init(width: rect.maxX - rect.minX, height: rect.maxY - rect.minY))
 
-                newRects.append(.init(rect: correctedRect.revert(to: avRect), textRecognizerMode: .perLine, censorMode: .bar, detectionMode: .manual, color: .black, visible: false))
+                if toolbarViewModel.manualMode != .erase {
+                    newRects.append(.init(rect: correctedRect.revert(to: avRect), textRecognizerMode: .perLine, censorMode: .bar, detectionMode: .manual, color: .black, visible: false))
+                }
 
                 for view in imageView.subviews {
                     if view.tag == 2 {
@@ -240,7 +242,7 @@ class PhotoEditingViewController: UIViewController, PHContentEditingController {
                 }
                 
                 if toolbarViewModel.manualMode == .erase {
-                    for rect in undoStateManager.rects {
+                    for rect in oldRects {
                         let box = rect.rect.convert(to: avRect)
                         
                         let topLeft = CGPoint(x: box.minX, y: box.minY)
@@ -256,8 +258,8 @@ class PhotoEditingViewController: UIViewController, PHContentEditingController {
                         let bottomRight = CGPoint(x: box.maxX, y: box.maxY)
                         
                         for point in [topLeft, topRight, topCenter, bottomCenter, centerLeft, centerRight, bottomLeft, bottomRight] {
-                            if let index = undoStateManager.rects.firstIndex(where: { $0.id == rect.id }), correctedRect.contains(point){
-                                undoStateManager.rects.remove(at: index)
+                            if let index = newRects.firstIndex(where: { $0.id == rect.id }), correctedRect.contains(point){
+                                newRects.remove(at: index)
                                 break
                             }
                         }
@@ -420,6 +422,10 @@ extension PhotoEditingViewController {
             let oldRects = self.undoStateManager.rects
             var newRects = self.undoStateManager.rects
             
+            if !self.isFirstLoad {
+                newRects.removeAll(where: { !$0.visible && $0.detectionMode == .auto})
+            }
+            
             results.forEach { result in
                 if let text = result.topCandidates(1).first {
                     if self.toolbarViewModel.textRecognizerMode == .perLine {
@@ -443,12 +449,8 @@ extension PhotoEditingViewController {
                 }
             }
             
-//            if !self.isFirstLoad {
-//                newRects.removeAll(where: { !$0.visible && $0.detectionMode == .auto})
-//            }
-            
-//            self.undoStateManager.modifyRects(newRects)
-            self.undoStateManager.rects = newRects
+            self.undoStateManager.modifyRects(newRects)
+//            self.undoStateManager.rects = newRects
             self.drawRectangles(input: input)
             
             if self.isFirstLoad {
@@ -609,7 +611,11 @@ extension PhotoEditingViewController {
                 
                 let center = CGPoint(x: box.midX, y: box.midY)
                 
-                if rect.detectionMode == .manual || (interaction.analysisHasText(at: center) && rect.textRecognizerMode == toolbarViewModel.textRecognizerMode) {
+//                if rect.detectionMode == .manual || (interaction.analysisHasText(at: center) && rect.textRecognizerMode == toolbarViewModel.textRecognizerMode) {
+//                    self.imageView.addSubview(view)
+//                }
+                
+                if rect.detectionMode == .manual || interaction.analysisHasText(at: center) {
                     self.imageView.addSubview(view)
                 }
                 
@@ -641,12 +647,6 @@ extension PhotoEditingViewController: IntensityViewDelegate {
 
 extension PhotoEditingViewController: ToolbarViewDelegate {
     func textRecognizerModeChanged(textRecognizerMode: TextRecognizerMode) {
-//        let newRects = undoStateManager.rects.filter({ $0.visible || $0.detectionMode == .auto })
-//
-//        undoImage(oldRects: undoStateManager.rects, newRects: newRects)
-//
-//        undoStateManager.rects = newRects
-        
         recognizeText(input: input)
     }
     
