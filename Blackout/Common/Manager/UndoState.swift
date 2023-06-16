@@ -22,6 +22,13 @@ class UndoStateManager: ObservableObject {
     @Published var undoStack: [(UndoState, UndoState)] = []
     @Published var redoStack: [(UndoState, UndoState)] = []
     
+    @Published var toolbarState = ToolbarState()
+    @Published var toolbarUndoStack: [(ToolbarState, ToolbarState)] = []
+    @Published var toolbarRedoStack: [(ToolbarState, ToolbarState)] = []
+    
+    @Published var undoCount = 0
+    @Published var redoCount = 0
+    
     init(_ rects: [TextRect]) {
         self.rects = rects
     }
@@ -33,6 +40,8 @@ class UndoStateManager: ObservableObject {
         
         let newState = UndoState(rects)
         undoStack.append((currentState, newState))
+        
+        undoCount += 1
     }
     
     func undo() {
@@ -40,6 +49,10 @@ class UndoStateManager: ObservableObject {
             rects = oldState.rects
             redoStack.append((oldState, newState))
         }
+        
+        undoCount = undoStack.count
+        redoCount = redoStack.count
+        print("setrec", undoCount, redoCount)
     }
     
     func redo() {
@@ -47,5 +60,9 @@ class UndoStateManager: ObservableObject {
             rects = newState.rects
             undoStack.append((oldState, newState))
         }
+        
+        undoCount = undoStack.count
+        redoCount = redoStack.count
+        print("setrec", undoCount, redoCount)
     }
 }

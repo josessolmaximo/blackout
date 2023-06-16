@@ -27,8 +27,8 @@ struct IntensityView: View {
             .frame(width: 35, height: 80)
         } else {
             VStack(spacing: 0) {
-                let maxDisabled = vm.censorMode == .blur ? vm.blurRadius == 100 : vm.pixelScale == 100
-                let minDisabled = vm.censorMode == .blur ? vm.blurRadius == 5 : vm.pixelScale == 5
+                let maxDisabled = vm.censorMode == .blur ? vm.toolbarState.blurRadius == 100 : vm.toolbarState.pixelScale == 100
+                let minDisabled = vm.censorMode == .blur ? vm.toolbarState.blurRadius == 5 : vm.toolbarState.pixelScale == 5
                 
                 HStack {
                     Button(action: {
@@ -46,7 +46,7 @@ struct IntensityView: View {
                 }
                 .frame(height: 25)
                 HStack {
-                    Text(vm.censorMode == .blur ? "\(vm.blurRadius)" : "\(vm.pixelScale)")
+                    Text(vm.censorMode == .blur ? "\(vm.toolbarState.blurRadius)" : "\(vm.toolbarState.pixelScale)")
                         .fontWeight(.semibold)
                 }
                 .frame(height: 30)

@@ -42,7 +42,7 @@ struct ToolbarView: View {
             .frame(maxWidth: .infinity)
             .background(.black)
             .foregroundColor(.white)
-            .onChange(of: vm.textRecognizerMode) { mode in
+            .onChange(of: vm.toolbarState.textRecognizerMode) { mode in
                 delegate?.textRecognizerModeChanged(textRecognizerMode: mode)
             }
             .onChange(of: vm.censorMode) { mode in
@@ -75,7 +75,7 @@ extension ToolbarView {
                         .font(.system(size: 11, weight: .medium))
                 }
             }
-            .foregroundColor(vm.undoManager.undoStack.count > 0 ? .white : .gray)
+            .foregroundColor(vm.undoManager.undoCount > 0 ? .white : .gray)
 
             Button {
                 vm.undoManager.redo()
@@ -90,7 +90,7 @@ extension ToolbarView {
                         .font(.system(size: 11, weight: .medium))
                 }
             }
-            .foregroundColor(vm.undoManager.redoStack.count > 0 ? .white : .gray)
+            .foregroundColor(vm.undoManager.redoCount > 0 ? .white : .gray)
         }
     }
     
@@ -117,7 +117,7 @@ extension ToolbarView {
             
             if vm.detectionMode == .auto {
                 Menu {
-                    Picker("", selection: $vm.textRecognizerMode) {
+                    Picker("", selection: $vm.toolbarState.textRecognizerMode) {
                         ForEach(TextRecognizerMode.allCases, id: \.self) { mode in
                             Label(mode.rawValue, systemImage: mode.image)
                                 .tag(mode)
@@ -125,11 +125,11 @@ extension ToolbarView {
                     }
                 } label: {
                     VStack(spacing: 5) {
-                        Image(systemName: vm.textRecognizerMode.image)
+                        Image(systemName: vm.toolbarState.textRecognizerMode.image)
                             .resizable()
                             .scaledToFit()
                             .frame(width: 20, height: 20)
-                        Text(String(vm.textRecognizerMode.rawValue.split(separator: " ").last ?? ""))
+                        Text(String(vm.toolbarState.textRecognizerMode.rawValue.split(separator: " ").last ?? ""))
                             .font(.system(size: 11, weight: .medium))
                     }
                     .frame(width: 40)

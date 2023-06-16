@@ -6,3 +6,12 @@
 //
 
 import Foundation
+
+struct ToolbarState {
+    var textRecognizerMode: TextRecognizerMode = .perLine
+    
+    var blurRadius = 10
+    var pixelScale = 10
+    
+    var isOverlayVisible = true
+}

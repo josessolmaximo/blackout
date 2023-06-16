@@ -42,8 +42,6 @@ class PhotoEditingViewController: UIViewController, PHContentEditingController {
         super.viewDidLoad()
         imageView.addInteraction(interaction)
         
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
-//        imageView.addGestureRecognizer(tapGestureRecognizer)
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
         view.addGestureRecognizer(panGestureRecognizer)
         
@@ -160,7 +158,7 @@ class PhotoEditingViewController: UIViewController, PHContentEditingController {
             for (index, textRect) in newRects.enumerated() {
                 let box = textRect.rect.convert(to: avRect)
                 
-                if box.contains(tapLocation) && (textRect.textRecognizerMode == toolbarViewModel.textRecognizerMode || textRect.visible || textRect.detectionMode == .manual) {
+                if box.contains(tapLocation) && (textRect.textRecognizerMode == toolbarViewModel.toolbarState.textRecognizerMode || textRect.visible || textRect.detectionMode == .manual) {
                     if textRect.censorMode != toolbarViewModel.censorMode {
                         newRects[index].visible = true
                     } else {
@@ -191,6 +189,8 @@ class PhotoEditingViewController: UIViewController, PHContentEditingController {
     @objc func handlePanGesture(_ sender: UIPanGestureRecognizer){
         let location = sender.location(in: imageView)
         let avRect = AVMakeRect(aspectRatio: imageView.image!.size, insideRect: imageView.bounds)
+        
+        guard toolbarViewModel.detectionMode == .manual else { return }
         
         switch sender.state {
         case .began:
@@ -428,20 +428,20 @@ extension PhotoEditingViewController {
             
             results.forEach { result in
                 if let text = result.topCandidates(1).first {
-                    if self.toolbarViewModel.textRecognizerMode == .perLine {
+                    if self.toolbarViewModel.toolbarState.textRecognizerMode == .perLine {
                         if let range = text.string.range(of: text.string),
                            let box = try? text.boundingBox(for: range)?.boundingBox {
                             if !newRects.contains(where: { $0.rect == box }){
-                                newRects.append(.init(rect: box, textRecognizerMode: self.toolbarViewModel.textRecognizerMode, censorMode: self.toolbarViewModel.censorMode, color: self.toolbarViewModel.barColor, visible: false))
+                                newRects.append(.init(rect: box, textRecognizerMode: self.toolbarViewModel.toolbarState.textRecognizerMode, censorMode: self.toolbarViewModel.censorMode, color: self.toolbarViewModel.barColor, visible: false))
                             }
                         }
-                    } else if self.toolbarViewModel.textRecognizerMode == .perWord {
+                    } else if self.toolbarViewModel.toolbarState.textRecognizerMode == .perWord {
                         let words = text.string.split(separator: " ")
                         for word in words {
                             if let range = text.string.range(of: "\(word)"),
                                let box = try? text.boundingBox(for: range)?.boundingBox {
                                 if !newRects.contains(where: { $0.rect == box}){
-                                    newRects.append(.init(rect: box, textRecognizerMode: self.toolbarViewModel.textRecognizerMode, censorMode: self.toolbarViewModel.censorMode, color: self.toolbarViewModel.barColor, visible: false))
+                                    newRects.append(.init(rect: box, textRecognizerMode: self.toolbarViewModel.toolbarState.textRecognizerMode, censorMode: self.toolbarViewModel.censorMode, color: self.toolbarViewModel.barColor, visible: false))
                                 }
                             }
                         }
@@ -504,7 +504,7 @@ extension PhotoEditingViewController {
         
         if rects.contains(where: {$0.censorMode == .blur}) {
             let blurFilter = CIFilter.gaussianBlur()
-            blurFilter.radius = Float(toolbarViewModel.blurRadius)
+            blurFilter.radius = Float(toolbarViewModel.toolbarState.blurRadius)
             blurFilter.inputImage = ciImage.clampedToExtent()
             
             let filterOutput = blurFilter.outputImage
@@ -518,7 +518,7 @@ extension PhotoEditingViewController {
         
         if rects.contains(where: {$0.censorMode == .pixel}) {
             let pixelFilter = CIFilter.pixellate()
-            pixelFilter.scale = Float(toolbarViewModel.pixelScale)
+            pixelFilter.scale = Float(toolbarViewModel.toolbarState.pixelScale)
             pixelFilter.inputImage = ciImage.clampedToExtent()
             
             let filterOutput = pixelFilter.outputImage
@@ -597,7 +597,7 @@ extension PhotoEditingViewController {
             }
         }
         
-        if toolbarViewModel.isOverlayVisible {
+        if toolbarViewModel.toolbarState.isOverlayVisible {
             let avRect = AVMakeRect(aspectRatio: imageView.image!.size, insideRect: imageView.bounds)
             
             for rect in undoStateManager.rects {

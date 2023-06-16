@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum CensorMode: String, CaseIterable {
+enum CensorMode: String, CaseIterable, Hashable {
     case bar = "Bar"
     case blur = "Blur"
     case pixel = "Pixel"
@@ -33,7 +33,7 @@ enum CensorMode: String, CaseIterable {
     }
 }
 
-enum TextRecognizerMode: String, CaseIterable {
+enum TextRecognizerMode: String, CaseIterable, Hashable {
     case perWord = "Detect per Word"
     case perLine = "Detect per Line"
     
@@ -47,7 +47,7 @@ enum TextRecognizerMode: String, CaseIterable {
     }
 }
 
-enum DetectionMode: String, CaseIterable {
+enum DetectionMode: String, CaseIterable, Hashable {
     case auto = "Auto"
     case manual = "Manual"
     

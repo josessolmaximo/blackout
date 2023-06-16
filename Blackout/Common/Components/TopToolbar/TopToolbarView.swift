@@ -21,11 +21,11 @@ struct TopToolbarView: View {
         HStack(spacing: 10) {
             Button {
                 withAnimation {
-                    vm.isOverlayVisible.toggle()
+                    vm.toolbarState.isOverlayVisible.toggle()
                     delegate?.isOverlayVisibleChanged()
                 }
             } label: {
-                Image(systemName: vm.isOverlayVisible ? "rectangle" : "rectangle.slash")
+                Image(systemName: vm.toolbarState.isOverlayVisible ? "rectangle" : "rectangle.slash")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 17.5, height: 17.5)
