@@ -542,7 +542,11 @@ extension PhotoEditingViewController {
                     let box = rect.rect.convert(to: bounds)
                     
                     if rect.visible {
-                        let roundedBox = CGRect(x: box.origin.x.rounded() - 1.5, y: box.origin.y.rounded() - 1.5, width: box.width.rounded() + 3, height: box.height.rounded() + 3)
+                        let roundedBox = CGRect(
+                            x: (box.origin.x - 1.5).rounded(),
+                            y: (box.origin.y - 1.5).rounded(),
+                            width: (box.width + 3).rounded(),
+                            height: (box.height + 3).rounded())
                         
                         if rect.censorMode == .blur {
                             guard let blurredImage = blurredImage,
